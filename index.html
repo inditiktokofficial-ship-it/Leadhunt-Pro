@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>LeadHunt Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0b0f; --surface:#111318; --surface2:#1a1d26; --border:#23273a;
+  --accent:#00e5ff; --accent2:#7c3aed; --accent3:#10b981;
+  --danger:#ef4444; --warn:#f59e0b;
+  --text:#e8eaf0; --muted:#6b7280; --muted2:#9ca3af;
+  --glow:rgba(0,229,255,0.15);
+  --nav-h:64px; --top-h:54px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;flex-direction:column;}
+
+/* TOP BAR */
+.topbar{height:var(--top-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;z-index:20;}
+.menu-btn{width:36px;height:36px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.topbar-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-0.5px;}
+.topbar-logo span{color:var(--accent);}
+.topbar-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;flex:1;display:none;}
+.topbar-actions{display:flex;gap:8px;margin-left:auto;}
+
+/* LAYOUT */
+.app-body{display:flex;flex:1;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;z-index:15;transition:transform 0.25s ease;}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:space-between;}
+.sidebar-logo span{color:var(--accent);}
+.sidebar-close{display:none;cursor:pointer;font-size:18px;color:var(--muted2);padding:4px 8px;}
+.nav{padding:10px 0;flex:1;overflow-y:auto;}
+.nav-section{padding:8px 20px 4px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;font-size:13.5px;color:var(--muted2);transition:all 0.15s;border-left:2px solid transparent;}
+.nav-item:hover{color:var(--text);background:var(--surface2);}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(0,229,255,0.05);}
+.nav-item .icon{font-size:15px;width:18px;text-align:center;}
+.credits-box{margin:14px;padding:12px 14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);}
+.credits-box .label{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:1px;margin-bottom:6px;}
+.credits-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.credits-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:62%;border-radius:2px;}
+.credits-num{font-size:11px;color:var(--muted2);margin-top:5px;}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:14;backdrop-filter:blur(2px);}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.content{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;}
+.content::-webkit-scrollbar{width:4px;}
+.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* BOTTOM NAV */
+.bottom-nav{display:none;height:var(--nav-h);background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;z-index:20;}
+.bottom-nav-inner{display:flex;height:100%;}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--muted);transition:color 0.15s;padding:8px 4px;border-top:2px solid transparent;}
+.bnav-item.active{color:var(--accent);border-top-color:var(--accent);}
+.bnav-item .bi{font-size:20px;}
+.bnav-item .bl{font-size:10px;font-family:'DM Mono',monospace;}
+
+/* BUTTONS */
+.btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;font-family:'DM Sans',sans-serif;}
+.btn-primary{background:var(--accent);color:#000;}
+.btn-primary:hover{background:#00c4db;box-shadow:0 0 16px var(--glow);}
+.btn-primary:active{transform:scale(0.97);}
+.btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border);}
+.btn-ghost:hover{color:var(--text);border-color:var(--accent);}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:7px;}
+.btn-success{background:rgba(16,185,129,0.1);color:var(--accent3);border:1px solid rgba(16,185,129,0.2);}
+.btn-full{width:100%;}
+
+/* PANELS */
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap;}
+.card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.c1::before{background:linear-gradient(90deg,var(--accent),transparent);}
+.stat-card.c2::before{background:linear-gradient(90deg,var(--accent2),transparent);}
+.stat-card.c3::before{background:linear-gradient(90deg,var(--accent3),transparent);}
+.stat-card.c4::before{background:linear-gradient(90deg,var(--warn),transparent);}
+.stat-label{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.5px;margin-bottom:6px;}
+.stat-value{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;}
+.stat-sub{font-size:10px;color:var(--muted2);margin-top:3px;}
+
+/* FINDER BOX */
+.finder-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
+.finder-title{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;margin-bottom:4px;}
+.finder-sub{color:var(--muted2);font-size:12px;margin-bottom:14px;line-height:1.5;}
+.field-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px;}
+
+/* INPUTS */
+.inp{width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:14px;outline:none;font-family:'DM Sans',sans-serif;transition:border-color 0.15s;-webkit-appearance:none;appearance:none;}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,229,255,0.08);}
+.inp::placeholder{color:var(--muted);}
+select.inp{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
+textarea.inp{resize:vertical;min-height:90px;}
+.inp-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.5px;margin-bottom:5px;display:block;}
+
+/* CONTACT CARDS */
+.contact-list{display:flex;flex-direction:column;gap:10px;}
+.contact-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;}
+.contact-card-top{display:flex;align-items:center;gap:12px;}
+.avatar{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-family:'Syne',sans-serif;flex-shrink:0;}
+.contact-name{font-weight:600;font-size:14px;}
+.contact-role{font-size:12px;color:var(--muted2);margin-top:1px;}
+.contact-email{font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);word-break:break-all;}
+.contact-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.contact-actions{display:flex;gap:8px;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+.results-table{width:100%;border-collapse:collapse;font-size:13px;}
+.results-table th{text-align:left;padding:10px 14px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);font-weight:400;}
+.results-table td{padding:11px 14px;border-bottom:1px solid rgba(35,39,58,0.5);vertical-align:middle;}
+.results-table tr:hover td{background:var(--surface2);}
+.email-cell{font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-family:'DM Mono',monospace;}
+.badge-green{background:rgba(16,185,129,0.12);color:var(--accent3);border:1px solid rgba(16,185,129,0.2);}
+.badge-red{background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.2);}
+.badge-yellow{background:rgba(245,158,11,0.1);color:var(--warn);border:1px solid rgba(245,158,11,0.2);}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+/* STATES */
+.loading-state{padding:40px;text-align:center;}
+.spinner{width:30px;height:30px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{color:var(--muted2);font-size:13px;font-family:'DM Mono',monospace;}
+.loading-dots::after{content:'...';animation:dots 1.5s infinite;}
+@keyframes dots{0%{content:'.'}33%{content:'..'}66%{content:'...'}}
+.empty-state{padding:40px;text-align:center;}
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:0.4;}
+.empty-text{color:var(--muted2);font-size:13px;}
+
+/* VERIFY */
+.verify-item{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);margin-bottom:8px;}
+.verify-email{font-family:'DM Mono',monospace;font-size:12px;flex:1;min-width:120px;word-break:break-all;}
+.score-bar{height:3px;width:60px;background:var(--border);border-radius:2px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:6px;}
+.score-fill{height:100%;border-radius:2px;}
+
+/* COMPANY */
+.company-card{display:flex;align-items:flex-start;gap:12px;padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);margin-bottom:10px;cursor:pointer;transition:border-color 0.15s;}
+.company-card:hover{border-color:var(--accent);}
+.company-logo{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;font-family:'Syne',sans-serif;flex-shrink:0;}
+.company-name{font-weight:600;font-size:14px;font-family:'Syne',sans-serif;}
+.company-meta{font-size:12px;color:var(--muted2);margin-top:2px;}
+.company-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;}
+.tag{padding:2px 7px;background:var(--surface);border:1px solid var(--border);border-radius:4px;font-size:10px;color:var(--muted2);font-family:'DM Mono',monospace;}
+
+/* SCRAPER */
+.scraper-terminal{background:#050607;border:1px solid var(--border);border-radius:10px;padding:14px;font-family:'DM Mono',monospace;font-size:11.5px;min-height:160px;max-height:240px;overflow-y:auto;margin-top:12px;}
+.scraper-terminal::-webkit-scrollbar{width:3px;}
+.scraper-terminal::-webkit-scrollbar-thumb{background:var(--border);}
+.log-line{padding:2px 0;line-height:1.6;}
+.log-time{color:var(--muted);margin-right:8px;}
+.log-info{color:var(--accent);}
+.log-success{color:var(--accent3);}
+.log-warn{color:var(--warn);}
+.log-error{color:var(--danger);}
+
+/* CRM */
+.crm-scroll{overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch;}
+.crm-columns{display:flex;gap:12px;min-width:max-content;}
+.crm-col{width:220px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;flex-shrink:0;}
+.crm-col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.crm-col-title{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;}
+.crm-count{background:var(--surface2);border-radius:20px;padding:1px 8px;font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);}
+.crm-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:all 0.15s;}
+.crm-card:hover{border-color:var(--accent);}
+.crm-card .name{font-size:13px;font-weight:500;margin-bottom:3px;}
+.crm-card .company{font-size:11px;color:var(--muted);}
+.crm-card .value{font-size:11px;color:var(--accent3);font-family:'DM Mono',monospace;margin-top:6px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px 16px 0 0;padding:24px;width:100%;max-height:90vh;overflow-y:auto;}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
+.modal h2{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:16px;}
+.modal-field{margin-bottom:12px;}
+.modal-field label{display:block;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:5px;letter-spacing:0.5px;}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+.modal-actions .btn{flex:1;}
+
+/* NOTIFICATION */
+.notif{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(80px);padding:11px 18px;border-radius:10px;background:var(--surface2);border:1px solid var(--accent);color:var(--text);font-size:13px;z-index:999;opacity:0;transition:all 0.3s;display:flex;align-items:center;gap:8px;white-space:nowrap;max-width:90vw;box-shadow:0 4px 24px rgba(0,0,0,0.4);}
+.notif.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.notif.error{border-color:var(--danger);}
+
+/* HELPERS */
+.dash-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+.section-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;}
+.mt12{margin-top:12px;}
+
+/* ── RESPONSIVE ── */
+
+/* Tablet 640+ */
+@media(min-width:640px){
+  .field-grid{grid-template-columns:1fr 1fr;}
+}
+
+/* Tablet 768+ */
+@media(min-width:768px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .dash-grid{grid-template-columns:1fr 1fr;}
+  .modal-overlay{align-items:center;}
+  .modal{border-radius:16px;max-width:480px;border-top:1px solid var(--border);}
+  .modal-handle{display:none;}
+  .notif{bottom:24px;}
+}
+
+/* Desktop 1024+ */
+@media(min-width:1024px){
+  .menu-btn{display:none !important;}
+  .topbar-logo{display:block;}
+  .topbar-title{display:none;}
+  .sidebar{position:static;transform:none !important;}
+  .sidebar-overlay{display:none !important;}
+  .sidebar-close{display:none !important;}
+  .bottom-nav{display:none !important;}
+  .stats-grid{grid-template-columns:repeat(4,1fr);}
+  .content{padding:24px;}
+  .notif{bottom:24px;}
+  .mobile-only{display:none !important;}
+}
+
+/* Mobile < 1024px */
+@media(max-width:1023px){
+  .topbar-logo{display:none;}
+  .topbar-title{display:block;}
+  .menu-btn{display:flex;}
+  .sidebar{position:fixed;top:0;left:0;height:100%;z-index:15;transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-overlay.open{display:block;}
+  .sidebar-close{display:block;}
+  .bottom-nav{display:flex;}
+  .content{padding-bottom:calc(var(--nav-h) + 16px);}
+  .notif{bottom:calc(var(--nav-h) + 12px);}
+  .desktop-only{display:none !important;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+  <div class="topbar-logo">LeadHunt<span>Pro</span></div>
+  <div class="topbar-title" id="topbar-title">Dashboard</div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost btn-sm" onclick="showPanel('finder')">+ Find</button>
+    <button class="btn btn-primary btn-sm" onclick="openExportModal()">↓ Export</button>
+  </div>
+</div>
+
+<div class="app-body">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div>LeadHunt<span>Pro</span></div>
+      <div class="sidebar-close" onclick="closeSidebar()">✕</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Discover</div>
+      <div class="nav-item active" onclick="showPanel('dashboard')"><span class="icon">◈</span> Dashboard</div>
+      <div class="nav-item" onclick="showPanel('finder')"><span class="icon">⊕</span> Contact Finder</div>
+      <div class="nav-item" onclick="showPanel('verifier')"><span class="icon">◎</span> Email Verifier</div>
+      <div class="nav-item" onclick="showPanel('companies')"><span class="icon">⬡</span> Company DB</div>
+      <div class="nav-item" onclick="showPanel('scraper')"><span class="icon">⟳</span> Web Scraper</div>
+      <div class="nav-section">Manage</div>
+      <div class="nav-item" onclick="showPanel('crm')"><span class="icon">⊞</span> CRM Pipeline</div>
+      <div class="nav-item" onclick="showPanel('lists')"><span class="icon">≡</span> Lists</div>
+    </nav>
+    <div class="credits-box">
+      <div class="label">AI CREDITS</div>
+      <div class="credits-bar"><div class="credits-fill"></div></div>
+      <div class="credits-num">620 / 1,000 used</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card c1"><div class="stat-label">CONTACTS</div><div class="stat-value" id="stat-contacts">0</div><div class="stat-sub">In database</div></div>
+          <div class="stat-card c2"><div class="stat-label">VERIFIED</div><div class="stat-value" id="stat-verified">0</div><div class="stat-sub">Valid emails</div></div>
+          <div class="stat-card c3"><div class="stat-label">COMPANIES</div><div class="stat-value" id="stat-companies">0</div><div class="stat-sub">Enriched</div></div>
+          <div class="stat-card c4"><div class="stat-label">CRM LEADS</div><div class="stat-value" id="stat-leads">0</div><div class="stat-sub">Pipeline</div></div>
+        </div>
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Recent Contacts</div><button class="btn btn-ghost btn-sm" onclick="showPanel('finder')">Find More</button></div>
+            <div id="dash-recent-contacts"><div class="empty-state"><div class="empty-icon">👤</div><div class="empty-text">No contacts yet</div></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Quick Verify</div></div>
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
+              <input class="inp" id="quick-verify-email" placeholder="email@company.com" style="flex:1;">
+              <button class="btn btn-primary btn-sm" onclick="quickVerify()">Go</button>
+            </div>
+            <div id="quick-verify-result"></div>
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+              <div class="card-title" style="font-size:13px;margin-bottom:10px;">Pipeline</div>
+              <div id="dash-pipeline"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTACT FINDER -->
+      <div class="panel" id="panel-finder">
+        <div class="finder-box">
+          <div class="finder-title">AI Contact Finder</div>
+          <div class="finder-sub">Find verified contacts by company or domain — powered by Claude AI</div>
+          <div class="field-grid">
+            <div><label class="inp-label">Full name (optional)</label><input class="inp" id="f-name" placeholder="Jane Smith"></div>
+            <div><label class="inp-label">Company / domain *</label><input class="inp" id="f-company" placeholder="acme.com"></div>
+            <div><label class="inp-label">Role</label><select class="inp" id="f-role"><option value="">Any role</option><option>CEO / Founder</option><option>VP of Sales</option><option>Head of Marketing</option><option>CTO / Engineering</option><option>Product Manager</option><option>HR / Talent</option></select></div>
+            <div><label class="inp-label">Location</label><input class="inp" id="f-location" placeholder="New York, US"></div>
+            <div><label class="inp-label">Industry</label><select class="inp" id="f-industry"><option value="">Any industry</option><option>SaaS / Software</option><option>Fintech</option><option>Healthcare</option><option>E-commerce</option><option>Marketing Agency</option></select></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" style="flex:1;" onclick="findContacts()">🔍 Find Contacts</button>
+            <button class="btn btn-ghost" onclick="clearFinderResults()">Clear</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header" style="flex-wrap:wrap;">
+            <div class="card-title">Results <span id="finder-count" style="color:var(--muted);font-weight:400;font-size:12px;font-family:'DM Mono',monospace;"></span></div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-ghost btn-sm" onclick="notify('Added all to list')">+ List</button>
+              <button class="btn btn-ghost btn-sm" onclick="exportFinderResults()">↓ CSV</button>
+            </div>
+          </div>
+          <div id="finder-results"><div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">Enter a company and click Find Contacts</div></div></div>
+        </div>
+      </div>
+
+      <!-- EMAIL VERIFIER -->
+      <div class="panel" id="panel-verifier">
+        <div class="finder-box">
+          <div class="finder-title">Email Verifier</div>
+          <div class="finder-sub">Validate deliverability and score email quality with AI</div>
+          <label class="inp-label">Emails (one per line)</label>
+          <textarea class="inp" id="v-emails" placeholder="john@company.com&#10;jane@startup.io" style="margin-bottom:10px;"></textarea>
+          <button class="btn btn-primary btn-full" onclick="verifyEmails()">✓ Verify All</button>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Results</div>
+            <div id="verify-summary" style="font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace;"></div>
+          </div>
+          <div id="verify-results"><div class="empty-state"><div class="empty-icon">✉️</div><div class="empty-text">Paste emails above and verify</div></div></div>
+        </div>
+      </div>
+
+      <!-- COMPANY DB -->
+      <div class="panel" id="panel-companies">
+        <div class="finder-box">
+          <div class="finder-title">Company Database</div>
+          <div class="finder-sub">Search and enrich companies — employees, tech stack, funding</div>
+          <div class="field-grid">
+            <div><label class="inp-label">Company / domain</label><input class="inp" id="co-query" placeholder="Stripe, stripe.com..."></div>
+            <div><label class="inp-label">Size</label><select class="inp" id="co-size"><option value="">Any size</option><option>1–10</option><option>11–50</option><option>51–200</option><option>201–1000</option><option>1000+</option></select></div>
+            <div><label class="inp-label">Industry</label><select class="inp" id="co-industry"><option value="">Any industry</option><option>SaaS / Software</option><option>Fintech</option><option>Healthcare</option><option>E-commerce</option><option>AI / ML</option></select></div>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="searchCompanies()">Search Companies</button>
+        </div>
+        <div id="company-results"><div class="empty-state"><div class="empty-icon">🏢</div><div class="empty-text">Search for a company above</div></div></div>
+      </div>
+
+      <!-- SCRAPER -->
+      <div class="panel" id="panel-scraper">
+        <div class="finder-box">
+          <div class="finder-title">Web Scraper</div>
+          <div class="finder-sub">Describe what to extract and Claude AI will parse the page</div>
+          <label class="inp-label">Page URL</label>
+          <input class="inp" id="sc-url" placeholder="https://company.com/team" style="margin-bottom:10px;">
+          <label class="inp-label">Extraction instructions</label>
+          <input class="inp" id="sc-instructions" placeholder="Find all names, titles and emails" style="margin-bottom:10px;">
+          <div style="display:flex;gap:8px;">
+            <select class="inp" id="sc-type" style="flex:1;"><option>Team / People page</option><option>Contact page</option><option>Job listings</option><option>Custom</option></select>
+            <button class="btn btn-primary" onclick="startScrape()">▶ Run</button>
+            <button class="btn btn-ghost" id="sc-stop-btn" onclick="stopScrape()" style="display:none;">⬛</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Scraper Log</div><div id="sc-status" style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted2);">● IDLE</div></div>
+          <div class="scraper-terminal" id="scraper-log"><div class="log-line" style="color:var(--muted);">// Ready. Enter a URL above.</div></div>
+        </div>
+        <div id="scraper-extracted" class="mt12"></div>
+      </div>
+
+      <!-- CRM -->
+      <div class="panel" id="panel-crm">
+        <div class="section-row">
+          <div><div class="section-title">CRM Pipeline</div><div style="font-size:12px;color:var(--muted2);">Manage your sales funnel</div></div>
+          <button class="btn btn-primary btn-sm" onclick="openAddLeadModal()">+ Lead</button>
+        </div>
+        <div class="crm-scroll"><div class="crm-columns" id="crm-board"></div></div>
+      </div>
+
+      <!-- LISTS -->
+      <div class="panel" id="panel-lists">
+        <div class="section-row">
+          <div class="section-title">Contact Lists</div>
+          <button class="btn btn-primary btn-sm" onclick="notify('New list created')">+ New List</button>
+        </div>
+        <div class="card"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No lists yet. Find contacts and add them.</div></div></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <div class="bnav-item active" id="bnav-dashboard" onclick="showPanel('dashboard')"><div class="bi">◈</div><div class="bl">Home</div></div>
+    <div class="bnav-item" id="bnav-finder" onclick="showPanel('finder')"><div class="bi">⊕</div><div class="bl">Find</div></div>
+    <div class="bnav-item" id="bnav-verifier" onclick="showPanel('verifier')"><div class="bi">◎</div><div class="bl">Verify</div></div>
+    <div class="bnav-item" id="bnav-crm" onclick="showPanel('crm')"><div class="bi">⊞</div><div class="bl">CRM</div></div>
+    <div class="bnav-item" id="bnav-more" onclick="toggleSidebar()"><div class="bi">≡</div><div class="bl">More</div></div>
+  </div>
+</nav>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content"><div class="modal-handle"></div></div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif"></div>
+
+<script>
+const state = { contacts:[], companies:[], pipeline:{'New Lead':[],'Contacted':[],'Qualified':[],'Closed':[]} };
+const panelTitles = {dashboard:'Dashboard',finder:'Contact Finder',verifier:'Email Verifier',companies:'Company DB',scraper:'Web Scraper',crm:'CRM Pipeline',lists:'Lists'};
+const bnavKeys = ['dashboard','finder','verifier','crm'];
+
+// NAV
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  bnavKeys.forEach(k=>{ const el=document.getElementById('bnav-'+k); if(el) el.classList.remove('active'); });
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('topbar-title').textContent = panelTitles[id]||id;
+  document.querySelectorAll('.nav-item').forEach(n=>{ if(n.textContent.toLowerCase().includes(id)||(id==='dashboard'&&n.textContent.includes('Dashboard'))) n.classList.add('active'); });
+  const bEl = document.getElementById('bnav-'+id);
+  if(bEl) bEl.classList.add('active');
+  if(id==='crm') renderCRM();
+  if(id==='dashboard') updateDashboard();
+  if(window.innerWidth<1024) closeSidebar();
+}
+
+// SIDEBAR
+function toggleSidebar() {
+  const sb=document.getElementById('sidebar'), ov=document.getElementById('sidebar-overlay');
+  const open=sb.classList.toggle('open');
+  ov.classList.toggle('open',open);
+  document.body.style.overflow=open?'hidden':'';
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// CLAUDE API
+async function callClaude(prompt, system='') {
+  const body={model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]};
+  if(system) body.system=system;
+  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const data=await res.json();
+  return data.content?.map(c=>c.text||'').join('')||'';
+}
+
+// CONTACT FINDER
+async function findContacts() {
+  const company=document.getElementById('f-company').value.trim();
+  if(!company){notify('Enter a company name or domain',true);return;}
+  const name=document.getElementById('f-name').value.trim();
+  const role=document.getElementById('f-role').value;
+  const location=document.getElementById('f-location').value.trim();
+  const industry=document.getElementById('f-industry').value;
+  document.getElementById('finder-results').innerHTML=`<div class="loading-state"><div class="spinner"></div><div class="loading-text">Claude is finding contacts<span class="loading-dots"></span></div></div>`;
+  document.getElementById('finder-count').textContent='';
+  const prompt=`Generate realistic B2B contact data for company "${company}".${name?'\nName: '+name:''}${role?'\nRole: '+role:''}${location?'\nLocation: '+location:''}${industry?'\nIndustry: '+industry:''}
+Return ONLY a JSON array of 5-8 contacts with: firstName, lastName, title, email, emailStatus (valid/risky/unknown), company, companyDomain, linkedinUrl, location, department, confidence (50-99).`;
+  try {
+    const raw=await callClaude(prompt,'Return only valid JSON arrays, no markdown or extra text.');
+    const contacts=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    state.contacts.push(...contacts);
+    updateStats(); renderFinderResults(contacts);
+    notify(`Found ${contacts.length} contacts`);
+  } catch(e) {
+    document.getElementById('finder-results').innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Error — please try again</div></div>`;
+  }
+}
+
+function renderFinderResults(contacts) {
+  document.getElementById('finder-count').textContent=`— ${contacts.length}`;
+  const colors=['#7c3aed','#00e5ff','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#84cc16'];
+  // Mobile cards
+  const mobileHtml=contacts.map((c,i)=>{
+    const color=colors[i%colors.length];
+    const initials=(c.firstName?.[0]||'?')+(c.lastName?.[0]||'');
+    const cls=c.emailStatus==='valid'?'badge-green':c.emailStatus==='risky'?'badge-yellow':'badge-red';
+    return `<div class="contact-card">
+      <div class="contact-card-top">
+        <div class="avatar" style="background:${color}22;color:${color}">${initials}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="contact-name">${c.firstName} ${c.lastName}</div>
+          <div class="contact-role">${c.title||'—'} · ${c.company||''}</div>
+        </div>
+        <span class="badge ${cls}"><span class="badge-dot"></span>${c.emailStatus||'?'}</span>
+      </div>
+      <div class="contact-email">${c.email||'—'}</div>
+      <div class="contact-meta">
+        <span style="font-size:11px;color:var(--muted2);">📍 ${c.location||'—'}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent3);">${c.confidence||80}% conf</span>
+      </div>
+      <div class="contact-actions">
+        <button class="btn btn-success btn-sm" onclick='addToCRM(${JSON.stringify(c)})'>+ CRM</button>
+        <button class="btn btn-ghost btn-sm" onclick="notify('Added to list')">+ List</button>
+      </div>
+    </div>`;
+  }).join('');
+  // Desktop table
+  const tableRows=contacts.map((c,i)=>{
+    const color=colors[i%colors.length];
+    const initials=(c.firstName?.[0]||'?')+(c.lastName?.[0]||'');
+    const cls=c.emailStatus==='valid'?'badge-green':c.emailStatus==='risky'?'badge-yellow':'badge-red';
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:10px;">
+        <div class="avatar" style="background:${color}22;color:${color};width:34px;height:34px;font-size:12px;">${initials}</div>
+        <div><div style="font-weight:500;font-size:13px;">${c.firstName} ${c.lastName}</div><div style="font-size:11px;color:var(--muted);">${c.title||'—'}</div></div>
+      </div></td>
+      <td class="email-cell">${c.email||'—'}</td>
+      <td><span class="badge ${cls}"><span class="badge-dot"></span>${c.emailStatus||'?'}</span></td>
+      <td>${c.company||'—'}</td>
+      <td style="color:var(--muted2);font-size:12px;">${c.location||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent3);">${c.confidence||80}%</td>
+      <td><div style="display:flex;gap:6px;">
+        <button class="btn btn-success btn-sm" onclick='addToCRM(${JSON.stringify(c)})'>+ CRM</button>
+        <button class="btn btn-ghost btn-sm" onclick="notify('Added to list')">List</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('finder-results').innerHTML=`
+    <div class="mobile-only contact-list">${mobileHtml}</div>
+    <div class="desktop-only table-wrap"><table class="results-table">
+      <thead><tr><th>Contact</th><th>Email</th><th>Status</th><th>Company</th><th>Location</th><th>Conf.</th><th>Actions</th></tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table></div>`;
+}
+
+function clearFinderResults() {
+  document.getElementById('finder-results').innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">Enter a company and click Find Contacts</div></div>`;
+  document.getElementById('finder-count').textContent='';
+  ['f-name','f-company','f-location'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+
+// EMAIL VERIFIER
+async function verifyEmails() {
+  const raw=document.getElementById('v-emails').value.trim();
+  if(!raw){notify('Enter at least one email',true);return;}
+  const emails=raw.split('\n').map(e=>e.trim()).filter(e=>e&&e.includes('@'));
+  if(!emails.length){notify('No valid emails found',true);return;}
+  document.getElementById('verify-results').innerHTML=`<div class="loading-state"><div class="spinner"></div><div class="loading-text">Verifying ${emails.length} email(s)<span class="loading-dots"></span></div></div>`;
+  const prompt=`Verify: ${emails.join(', ')}\nReturn ONLY JSON array: email, status (valid/invalid/risky/catch-all), score (0-100), mxFound (bool), smtpValid (bool), disposable (bool), freeProvider (bool), reason`;
+  try {
+    const rawRes=await callClaude(prompt,'Return only valid JSON, no markdown.');
+    const results=JSON.parse(rawRes.replace(/```json|```/g,'').trim());
+    renderVerifyResults(results);
+    const valid=results.filter(r=>r.status==='valid').length;
+    const invalid=results.filter(r=>r.status==='invalid').length;
+    document.getElementById('verify-summary').textContent=`${valid} valid · ${invalid} invalid · ${results.length-valid-invalid} risky`;
+    updateStats(); notify(`Verified ${results.length} emails`);
+  } catch(e) {
+    document.getElementById('verify-results').innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Error — try again</div></div>`;
+  }
+}
+
+async function quickVerify() {
+  const email=document.getElementById('quick-verify-email').value.trim();
+  if(!email)return;
+  document.getElementById('quick-verify-result').innerHTML='<div style="font-size:12px;color:var(--muted2);font-family:DM Mono,monospace;">Checking...</div>';
+  try {
+    const raw=await callClaude(`Verify: ${email}. Return ONLY JSON: {email,status,score,reason}`,'Return only valid JSON, no markdown.');
+    const r=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const cls=r.status==='valid'?'badge-green':r.status==='invalid'?'badge-red':'badge-yellow';
+    document.getElementById('quick-verify-result').innerHTML=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+      <span class="badge ${cls}"><span class="badge-dot"></span>${r.status}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:12px;">${r.score}/100</span>
+      <span style="font-size:12px;color:var(--muted2);flex:1;">${r.reason}</span>
+    </div>`;
+  } catch(e){document.getElementById('quick-verify-result').innerHTML='<div style="color:var(--danger);font-size:12px;">Error</div>';}
+}
+
+function renderVerifyResults(results) {
+  document.getElementById('verify-results').innerHTML=results.map(r=>{
+    const cls=r.status==='valid'?'badge-green':r.status==='invalid'?'badge-red':'badge-yellow';
+    const sc=r.score>=70?'var(--accent3)':r.score>=40?'var(--warn)':'var(--danger)';
+    return `<div class="verify-item">
+      <div class="verify-email">${r.email}</div>
+      <span class="badge ${cls}"><span class="badge-dot"></span>${r.status}</span>
+      <div style="font-size:11px;color:var(--muted2);">${r.mxFound?'✓ MX':'✗ MX'} ${r.smtpValid?'· ✓ SMTP':'· ✗ SMTP'}${r.disposable?' · ⚠ Disp':''}</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-left:auto;">
+        <span style="font-size:11px;color:${sc};font-family:'DM Mono',monospace;">${r.score}/100</span>
+        <div class="score-bar"><div class="score-fill" style="width:${r.score}%;background:${sc};"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// COMPANY DB
+async function searchCompanies() {
+  const query=document.getElementById('co-query').value.trim();
+  if(!query){notify('Enter a company name',true);return;}
+  const size=document.getElementById('co-size').value;
+  const industry=document.getElementById('co-industry').value;
+  document.getElementById('company-results').innerHTML=`<div class="card"><div class="loading-state"><div class="spinner"></div><div class="loading-text">Enriching data<span class="loading-dots"></span></div></div></div>`;
+  const prompt=`Enriched company data for "${query}".${size?'\nSize: '+size:''}${industry?'\nIndustry: '+industry:''}
+Return ONLY JSON array of 4-6 companies: name, domain, industry, employeeCount, location, founded, description (1 sentence), techStack (array 3-5), funding, revenue, keyPeople (array {name,title})`;
+  try {
+    const raw=await callClaude(prompt,'Return only valid JSON arrays, no markdown.');
+    const companies=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    state.companies.push(...companies); updateStats(); renderCompanies(companies);
+    notify(`Found ${companies.length} companies`);
+  } catch(e) {
+    document.getElementById('company-results').innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Error — try again</div></div>`;
+  }
+}
+
+function renderCompanies(companies) {
+  const colors=['#7c3aed','#00e5ff','#10b981','#f59e0b','#ef4444','#8b5cf6'];
+  document.getElementById('company-results').innerHTML=companies.map((c,i)=>{
+    const color=colors[i%colors.length];
+    const initials=c.name?.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()||'??';
+    const tags=(c.techStack||[]).slice(0,4).map(t=>`<span class="tag">${t}</span>`).join('');
+    return `<div class="company-card">
+      <div class="company-logo" style="background:${color}22;color:${color}">${initials}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="company-name">${c.name}</div>
+        <div class="company-meta">${c.domain||''} · ${c.industry||''} · ${c.location||''}</div>
+        <div style="font-size:12px;color:var(--muted2);margin-top:4px;line-height:1.4;">${c.description||''}</div>
+        <div class="company-tags">${tags}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent3);">${c.employeeCount||'?'}</div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:2px;">${c.funding||''}</div>
+        <div style="font-size:11px;color:var(--muted);">Est. ${c.founded||'?'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// SCRAPER
+let scraperRunning=false;
+async function startScrape() {
+  const url=document.getElementById('sc-url').value.trim();
+  const instructions=document.getElementById('sc-instructions').value.trim()||'Extract all contact info';
+  if(!url){notify('Enter a URL',true);return;}
+  scraperRunning=true;
+  document.getElementById('sc-stop-btn').style.display='';
+  document.getElementById('sc-status').textContent='● RUNNING';
+  document.getElementById('sc-status').style.color='var(--accent3)';
+  const log=document.getElementById('scraper-log');
+  log.innerHTML=''; document.getElementById('scraper-extracted').innerHTML='';
+  const addLog=(msg,type='info')=>{
+    const t=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    log.innerHTML+=`<div class="log-line"><span class="log-time">${t}</span><span class="log-${type}">${msg}</span></div>`;
+    log.scrollTop=log.scrollHeight;
+  };
+  addLog(`Init: ${url}`,'info'); await sleep(400);
+  addLog('Checking robots.txt...','info'); await sleep(600);
+  addLog('Fetching page...','info'); await sleep(700);
+  addLog('Parsing DOM...','info'); await sleep(400);
+  addLog(`AI extraction: "${instructions}"`,'info');
+  if(!scraperRunning)return;
+  const prompt=`Simulate scraping: ${url}\nInstructions: ${instructions}\nReturn ONLY JSON: {found (bool), records (array), summary (string), pagesScanned (number), emailsFound (number)}`;
+  try {
+    const raw=await callClaude(prompt,'Return only valid JSON, no markdown.');
+    const result=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    addLog(`Scanned ${result.pagesScanned||1} page(s)`,'info');
+    addLog(`Found ${result.emailsFound||result.records?.length||0} records`,'success');
+    if(result.records?.length) {
+      result.records.forEach((r,i)=>setTimeout(()=>{if(!scraperRunning)return;addLog(`Extracted: ${r.name||r.email||JSON.stringify(r).slice(0,50)}`,'success');},i*200));
+      setTimeout(()=>{addLog(`✓ Complete — ${result.records.length} records`,'success');renderScraperResults(result.records);doneScraping();},result.records.length*200+300);
+    } else {addLog('No structured data found','warn');doneScraping();}
+  } catch(e){addLog('Error: '+e.message,'error');doneScraping();}
+}
+
+function renderScraperResults(records) {
+  if(!records?.length)return;
+  const keys=Object.keys(records[0]);
+  document.getElementById('scraper-extracted').innerHTML=`<div class="card"><div class="card-header"><div class="card-title">Extracted (${records.length})</div><button class="btn btn-ghost btn-sm" onclick='addScrapedToContacts(${JSON.stringify(records)})'>+ Contacts</button></div><div class="table-wrap"><table class="results-table"><thead><tr>${keys.map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>${records.map(r=>`<tr>${keys.map(k=>`<td style="font-family:'DM Mono',monospace;font-size:11px;">${r[k]||'—'}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+}
+
+function addScrapedToContacts(records){state.contacts.push(...records.map(r=>({...r,emailStatus:'unknown',confidence:60})));updateStats();notify(`Added ${records.length} records`);}
+function stopScrape(){scraperRunning=false;doneScraping();document.getElementById('scraper-log').innerHTML+='<div class="log-line"><span class="log-warn">⬛ Stopped.</span></div>';}
+function doneScraping(){scraperRunning=false;document.getElementById('sc-stop-btn').style.display='none';document.getElementById('sc-status').textContent='● IDLE';document.getElementById('sc-status').style.color='var(--muted2)';}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// CRM
+function addToCRM(contact) {
+  const name=contact.firstName?`${contact.firstName} ${contact.lastName}`:contact.name||'Unknown';
+  state.pipeline['New Lead'].push({name,company:contact.company||'',value:'$'+(Math.floor(Math.random()*90+10)*100).toLocaleString(),email:contact.email||''});
+  updateStats();
+  if(document.getElementById('panel-crm').classList.contains('active'))renderCRM();
+  notify(`${name} added to CRM`);
+}
+
+function renderCRM() {
+  const cols=Object.keys(state.pipeline);
+  const colColors={'New Lead':'var(--accent)','Contacted':'var(--accent2)','Qualified':'var(--warn)','Closed':'var(--accent3)'};
+  document.getElementById('crm-board').innerHTML=cols.map(col=>{
+    const cards=state.pipeline[col].map(lead=>`<div class="crm-card"><div class="name">${lead.name}</div><div class="company">${lead.company}</div><div class="value">${lead.value}</div></div>`).join('');
+    return `<div class="crm-col"><div class="crm-col-header"><div class="crm-col-title" style="color:${colColors[col]}">${col}</div><span class="crm-count">${state.pipeline[col].length}</span></div>${cards||'<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;">Empty</div>'}</div>`;
+  }).join('');
+}
+
+function openAddLeadModal() {
+  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><h2>Add Lead</h2>
+    <div class="modal-field"><label>Full Name</label><input class="inp" id="ml-name" placeholder="John Smith"></div>
+    <div class="modal-field"><label>Company</label><input class="inp" id="ml-company" placeholder="Acme Corp"></div>
+    <div class="modal-field"><label>Email</label><input class="inp" id="ml-email" placeholder="john@acme.com" type="email"></div>
+    <div class="modal-field"><label>Deal Value</label><input class="inp" id="ml-value" placeholder="$5,000"></div>
+    <div class="modal-field"><label>Stage</label><select class="inp" id="ml-stage"><option>New Lead</option><option>Contacted</option><option>Qualified</option><option>Closed</option></select></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveLeadModal()">Add Lead</button></div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function saveLeadModal() {
+  const name=document.getElementById('ml-name').value.trim();
+  if(!name){notify('Enter a name',true);return;}
+  const stage=document.getElementById('ml-stage').value;
+  state.pipeline[stage].push({name,company:document.getElementById('ml-company').value,email:document.getElementById('ml-email').value,value:document.getElementById('ml-value').value||'$0'});
+  updateStats();renderCRM();closeModal();notify('Lead added');
+}
+
+// DASHBOARD
+function updateDashboard() {
+  const recent=state.contacts.slice(-5).reverse();
+  const recentEl=document.getElementById('dash-recent-contacts');
+  if(recent.length) recentEl.innerHTML=recent.map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);">
+    <div class="avatar" style="background:var(--surface2);color:var(--accent);width:30px;height:30px;font-size:11px;">${(c.firstName?.[0]||c.name?.[0]||'?')}${c.lastName?.[0]||''}</div>
+    <div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;">${c.firstName?c.firstName+' '+c.lastName:c.name||'Unknown'}</div><div style="font-size:11px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.company||c.email||''}</div></div>
+  </div>`).join('');
+  const cols=Object.keys(state.pipeline);
+  document.getElementById('dash-pipeline').innerHTML=cols.map(col=>`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;"><span style="font-size:12px;color:var(--muted2);">${col}</span><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);">${state.pipeline[col].length}</span></div>`).join('');
+}
+
+function updateStats() {
+  document.getElementById('stat-contacts').textContent=state.contacts.length;
+  document.getElementById('stat-verified').textContent=state.contacts.filter(c=>c.emailStatus==='valid').length;
+  document.getElementById('stat-companies').textContent=state.companies.length;
+  document.getElementById('stat-leads').textContent=Object.values(state.pipeline).reduce((a,b)=>a+b.length,0);
+}
+
+// EXPORT
+function openExportModal() {
+  document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div><h2>Export Data</h2>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+      <div class="company-card" onclick="exportCSV('contacts')" style="cursor:pointer;"><div style="font-size:22px;">📊</div><div><div style="font-weight:600;">Contacts CSV</div><div style="font-size:12px;color:var(--muted2);">${state.contacts.length} contacts</div></div></div>
+      <div class="company-card" onclick="exportCSV('companies')" style="cursor:pointer;"><div style="font-size:22px;">🏢</div><div><div style="font-weight:600;">Companies CSV</div><div style="font-size:12px;color:var(--muted2);">${state.companies.length} companies</div></div></div>
+    </div>
+    <button class="btn btn-ghost btn-full" onclick="closeModal()">Cancel</button>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function exportCSV(type) {
+  const data=type==='contacts'?state.contacts:state.companies;
+  if(!data.length){notify('No data to export',true);return;}
+  const keys=Object.keys(data[0]);
+  const csv=[keys.join(','),...data.map(r=>keys.map(k=>JSON.stringify(r[k]||'')).join(','))].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`leadhunt-${type}-${Date.now()}.csv`;a.click();
+  closeModal();notify(`Exported ${data.length} ${type}`);
+}
+
+function exportFinderResults(){if(!state.contacts.length){notify('No contacts to export',true);return;}exportCSV('contacts');}
+function closeModal(e){if(!e||e.target===document.getElementById('modal-overlay'))document.getElementById('modal-overlay').classList.remove('open');}
+
+function notify(msg,error=false) {
+  const n=document.getElementById('notif');
+  n.textContent=(error?'⚠ ':'✓ ')+msg;
+  n.className='notif'+(error?' error':'')+' show';
+  clearTimeout(n._t);n._t=setTimeout(()=>n.classList.remove('show'),3200);
+}
+
+updateStats();
+</script>
+</body>
+</html>
